@@ -508,10 +508,10 @@ void LoadMappingFromFile(const graph<vertex> &GA, bool isSym, bool useOutdeg, pv
 template<class vertex>
 void generateMapping(const graph<vertex> &GA, ReorderingAlgo reordering_algo, bool isSym, bool useOutdeg,
                      pvector<uintE> &new_ids, bool isPageRank, bool isDenseWrite, std::string order_file,
-                     uint32_t num_vertices, uint64_t num_edges) {
+                     uint32_t num_vertices, uint64_t num_edges, std::string graph_name, std::string sqlite_db_path) {
 	switch (reordering_algo) {
 		case HubSort:
-			generateHubSortMapping(GA, isSym, useOutdeg, new_ids, isPageRank, isDenseWrite);
+			generateHubSortMapping(GA, isSym, useOutdeg, new_ids, isPageRank, isDenseWrite, graph_name, sqlite_db_path);
 			break;
 		case Sort:
 			generateSortMapping(GA, isSym, useOutdeg, new_ids, isPageRank, isDenseWrite);
@@ -526,7 +526,7 @@ void generateMapping(const graph<vertex> &GA, ReorderingAlgo reordering_algo, bo
 			generateHubClusterDBGMapping(GA, isSym, useOutdeg, new_ids, isPageRank, isDenseWrite);
 			break;
 		case HubCluster:
-			generateHubClusterMapping(GA, isSym, useOutdeg, new_ids, isPageRank, isDenseWrite);
+			generateHubClusterMapping(GA, isSym, useOutdeg, new_ids, isPageRank, isDenseWrite, graph_name, sqlite_db_path);
 			break;
 		case Random:
 			generateRandomMapping(GA, isSym, useOutdeg, new_ids, isPageRank, isDenseWrite);

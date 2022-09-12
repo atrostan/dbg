@@ -50,6 +50,8 @@ int rand_gran = 1;
 int num_roots = 8;
 string map_file = "";
 string order_file = "";
+string graph_name = "";
+string sqlite_db_path = "";
 #endif
 
 //*****START FRAMEWORK*****
@@ -525,6 +527,9 @@ int parallel_main(int argc, char* argv[]) {
   num_roots = P.getOptionIntValue("-num_roots", 8);
   map_file = P.getOptionValue("-map_file", "");
   order_file = P.getOptionValue("-order_file", "");
+	graph_name = P.getOptionValue("-graph_name", "");
+	sqlite_db_path = P.getOptionValue("-sqlite_db_path", "");
+
   num_vertices = P.getOptionIntValue("-num_vertices", -1);
   num_edges = P.getOptionIntValue("-num_edges", -1);
 
@@ -547,6 +552,8 @@ int parallel_main(int argc, char* argv[]) {
   cout << "num_roots: " << num_roots << endl;
 	cout << "map_file: " << map_file << endl;
 	cout << "order_file: " << order_file << endl;
+	cout << "graph_name: " << graph_name << endl;
+	cout << "sqlite_db_path: " << sqlite_db_path << endl;
 	cout << "num_vertices: " << num_vertices << endl;
 	cout << "num_edges: " << num_edges << endl;
   cout << "rand_gran: " << rand_gran << endl;
@@ -569,12 +576,12 @@ int parallel_main(int argc, char* argv[]) {
           if ( reordering_algo > MAP ) {
               pvector<uintE> new_ids1(G.n, UINT_E_MAX);
               pvector<uintE> new_ids2(G.n, UINT_E_MAX);
-              graph<symmetricVertex> newG1 = preprocessGraph<symmetricVertex>(G, symmetric, (degree_used_for_reordering == 0), new_ids1, false, false, MAP, order_file, num_vertices, num_edges);
-              newG = preprocessGraph<symmetricVertex>(newG1, symmetric, (degree_used_for_reordering == 0), new_ids2, false, false, (ReorderingAlgo)(reordering_algo - MAP), order_file, num_vertices, num_edges);
+              graph<symmetricVertex> newG1 = preprocessGraph<symmetricVertex>(G, symmetric, (degree_used_for_reordering == 0), new_ids1, false, false, MAP, order_file, num_vertices, num_edges, graph_name, sqlite_db_path);
+              newG = preprocessGraph<symmetricVertex>(newG1, symmetric, (degree_used_for_reordering == 0), new_ids2, false, false, (ReorderingAlgo)(reordering_algo - MAP), order_file, num_vertices, num_edges, graph_name, sqlite_db_path);
               mergeTwoPreprocessingIndices(new_ids1, new_ids2, new_ids);
               newG1.del();
           } else {
-              newG = preprocessGraph<symmetricVertex>(G, symmetric, (degree_used_for_reordering == 0), new_ids, false, false, reordering_algo, order_file, num_vertices, num_edges);
+              newG = preprocessGraph<symmetricVertex>(G, symmetric, (degree_used_for_reordering == 0), new_ids, false, false, reordering_algo, order_file, num_vertices, num_edges, graph_name, sqlite_db_path);
           }
           G.del();
           Compute(newG,P,new_ids);
@@ -601,12 +608,12 @@ int parallel_main(int argc, char* argv[]) {
           if ( reordering_algo > MAP ) {
               pvector<uintE> new_ids1(G.n, UINT_E_MAX);
               pvector<uintE> new_ids2(G.n, UINT_E_MAX);
-              graph<asymmetricVertex> newG1 = preprocessGraph<asymmetricVertex>(G, symmetric, (degree_used_for_reordering == 0), new_ids1, isPageRank, isDenseWrite, MAP, order_file, num_vertices, num_edges);
-              newG = preprocessGraph<asymmetricVertex>(newG1, symmetric, (degree_used_for_reordering == 0), new_ids2, isPageRank, isDenseWrite, (ReorderingAlgo)(reordering_algo - MAP), order_file, num_vertices, num_edges);
+              graph<asymmetricVertex> newG1 = preprocessGraph<asymmetricVertex>(G, symmetric, (degree_used_for_reordering == 0), new_ids1, isPageRank, isDenseWrite, MAP, order_file, num_vertices, num_edges, graph_name, sqlite_db_path);
+              newG = preprocessGraph<asymmetricVertex>(newG1, symmetric, (degree_used_for_reordering == 0), new_ids2, isPageRank, isDenseWrite, (ReorderingAlgo)(reordering_algo - MAP), order_file, num_vertices, num_edges, graph_name, sqlite_db_path);
               mergeTwoPreprocessingIndices(new_ids1, new_ids2, new_ids);
               newG1.del();
           } else {
-              newG = preprocessGraph<asymmetricVertex>(G, symmetric, (degree_used_for_reordering == 0), new_ids, isPageRank, isDenseWrite, reordering_algo, order_file, num_vertices, num_edges);
+              newG = preprocessGraph<asymmetricVertex>(G, symmetric, (degree_used_for_reordering == 0), new_ids, isPageRank, isDenseWrite, reordering_algo, order_file, num_vertices, num_edges, graph_name, sqlite_db_path);
           }
         G.del();
         Compute(newG,P,new_ids);

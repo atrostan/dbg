@@ -34,7 +34,8 @@
 #include <parallel/algorithm>
 #include <omp.h>
 #include <cassert>
-
+#include "../../graph_preprocess/sql.h"
+#include <map>
 #include "parallel.h"
 #include "blockRadixSort.h"
 #include "quickSort.h"
@@ -47,24 +48,24 @@
 
 using namespace std;
 
-typedef pair <uintE, uintE> intPair;
-typedef pair <uintE, pair<uintE, intE>> intTriple;
+typedef pair<uintE, uintE> intPair;
+typedef pair<uintE, pair<uintE, intE>> intTriple;
 
 template<class E>
 struct pairFirstCmp {
-	bool operator()(pair <uintE, E> a, pair <uintE, E> b) {
+	bool operator()(pair<uintE, E> a, pair<uintE, E> b) {
 		return a.first < b.first;
 	}
 };
 
 template<class E>
 struct getFirst {
-	uintE operator()(pair <uintE, E> a) { return a.first; }
+	uintE operator()(pair<uintE, E> a) { return a.first; }
 };
 
 template<class IntType>
 struct pairBothCmp {
-	bool operator()(pair <uintE, IntType> a, pair <uintE, IntType> b) {
+	bool operator()(pair<uintE, IntType> a, pair<uintE, IntType> b) {
 		if (a.first != b.first) return a.first < b.first;
 		return a.second < b.second;
 	}
@@ -250,16 +251,16 @@ graph<vertex> readGraphFromFile(char *fname, bool isSymmetric, bool mmap) {
 	//W.del(); // to deal with performance bug in malloc
 	W.del(); //The original code ^ commented this out
 #else // #ifdef VGR // Added by Priyank
-	if ( sizeof(uintT) != sizeof(unsigned long long) ) {
-			std::cout << sizeof(uintT) << " " << sizeof(unsigned long long) << std::endl;
-			abort();
+	if (sizeof(uintT) != sizeof(unsigned long long)) {
+		std::cout << sizeof(uintT) << " " << sizeof(unsigned long long) << std::endl;
+		abort();
 	}
-	if ( sizeof(uintE) != sizeof(unsigned int) ) {
-			std::cout << sizeof(uintE) << " " << sizeof(unsigned int) << std::endl;
-			abort();
+	if (sizeof(uintE) != sizeof(unsigned int)) {
+		std::cout << sizeof(uintE) << " " << sizeof(unsigned int) << std::endl;
+		abort();
 	}
 	ifstream ifs(fname, std::ios::binary);
-	if ( !ifs.good() ) {
+	if (!ifs.good()) {
 		std::cout << "Unable to open file: " << fname << std::endl;
 		abort();
 	}
@@ -267,17 +268,17 @@ graph<vertex> readGraphFromFile(char *fname, bool isSymmetric, bool mmap) {
 	unsigned long long minor_version;
 	unsigned long long n1;
 	unsigned long long m1;
-	ifs.read((char*)&major_version, sizeof(unsigned long long));
-	ifs.read((char*)&minor_version, sizeof(unsigned long long));
-	ifs.read((char*)&n1, sizeof(unsigned long long));
-	ifs.read((char*)&m1, sizeof(unsigned long long));
+	ifs.read((char *) &major_version, sizeof(unsigned long long));
+	ifs.read((char *) &minor_version, sizeof(unsigned long long));
+	ifs.read((char *) &n1, sizeof(unsigned long long));
+	ifs.read((char *) &m1, sizeof(unsigned long long));
 
-	long n,m;
+	long n, m;
 	m = m1;
 	n = n1;
 #ifndef WEIGHTED
-	if ( ( major_version != 1 ) || ( minor_version != 0 ) ) {
-			std::cout << "major: " << major_version << " minor: " << minor_version << "  n: " << n << " m: " << m << std::endl;
+	if ((major_version != 1) || (minor_version != 0)) {
+		std::cout << "major: " << major_version << " minor: " << minor_version << "  n: " << n << " m: " << m << std::endl;
 		abort();
 	}
 #else
@@ -287,19 +288,19 @@ graph<vertex> readGraphFromFile(char *fname, bool isSymmetric, bool mmap) {
 	}
 #endif
 
-	uintT* offsets = newA(uintT,n);
+	uintT *offsets = newA(uintT, n);
 	assert(offsets != NULL && "Malloc failure\n");
-	ifs.read((char*)&offsets[1], sizeof(unsigned long long) * (n-1));
-	if ( !ifs || (ifs.gcount() != (sizeof(unsigned long long) * (n-1))) ) {
+	ifs.read((char *) &offsets[1], sizeof(unsigned long long) * (n - 1));
+	if (!ifs || (ifs.gcount() != (sizeof(unsigned long long) * (n - 1)))) {
 		std::cout << "Error in reading offsets." << std::endl;
 		abort();
 	}
 	unsigned long long temp;
-	ifs.read((char*)&temp, sizeof(unsigned long long) * (1));
+	ifs.read((char *) &temp, sizeof(unsigned long long) * (1));
 	offsets[0] = 0;
 
 #ifndef WEIGHTED
-	uintE* edges = newA(uintE,m);
+	uintE *edges = newA(uintE, m);
 #else
 	intE* edges_ = newA(intE,2*m);
 	assert(edges_ != NULL && "Malloc failure\n");
@@ -307,8 +308,8 @@ graph<vertex> readGraphFromFile(char *fname, bool isSymmetric, bool mmap) {
 #endif
 	assert(edges != NULL && "Malloc failure\n");
 #ifndef WEIGHTED
-	ifs.read((char*)edges, sizeof(unsigned int) * m);
-	if ( !ifs || (ifs.gcount() != (sizeof(unsigned int) * m)) ) {
+	ifs.read((char *) edges, sizeof(unsigned int) * m);
+	if (!ifs || (ifs.gcount() != (sizeof(unsigned int) * m))) {
 		std::cout << "Error in reading edges." << std::endl;
 		abort();
 	}
@@ -738,7 +739,7 @@ static pvector<uintT> ParallelPrefixSum(const pvector<uintT> &degrees) {
 template<class vertex>
 void
 generateHubClusterMapping(const graph<vertex> &GA, bool isSym, bool useOutdeg, pvector<uintE> &new_ids, bool isPageRank,
-                          bool isDenseWrite) {
+                          bool isDenseWrite, std::string graph_name, std::string sqlite_db_path) {
 	Timer t;
 	t.Start();
 
@@ -843,13 +844,14 @@ generateHubClusterMapping(const graph<vertex> &GA, bool isSym, bool useOutdeg, p
 
 	t.Stop();
 	t.PrintTime("HubCluster Map Time", t.Seconds());
+	single_val_set_int(sqlite_db_path, "hubcluster", "preproc", graph_name, t.Millisecs());
 }
 
 
 template<class vertex>
 void
 generateHubSortMapping(const graph<vertex> &GA, bool isSym, bool useOutdeg, pvector<uintE> &new_ids, bool isPageRank,
-                       bool isDenseWrite) {
+                       bool isDenseWrite, std::string graph_name, std::string sqlite_db_path) {
 	Timer t;
 	t.Start();
 
@@ -928,6 +930,8 @@ generateHubSortMapping(const graph<vertex> &GA, bool isSym, bool useOutdeg, pvec
 
 	t.Stop();
 	t.PrintTime("HubSort Map Time", t.Seconds());
+	single_val_set_int(sqlite_db_path, "hubsort", "preproc", graph_name, t.Millisecs());
+
 }
 
 
@@ -941,7 +945,8 @@ template<class vertex>
 graph<vertex> preprocessGraph(graph<vertex> GA, bool isSym, bool useOutdeg,
                               pvector<uintE> &new_ids, bool isPageRank = false,
                               bool isDenseWrite = false, ReorderingAlgo reordering_algo = DBG,
-                              std::string order_file = "", uint32_t num_vertices = -1, uint64_t num_edges = -1) {
+                              std::string order_file = "", uint32_t num_vertices = -1, uint64_t num_edges = -1,
+                              std::string graph_name = "", std::string sqlite_db_path = "") {
 	Timer t;
 	t.Start();
 	auto numVertices = GA.n;
@@ -951,7 +956,7 @@ graph<vertex> preprocessGraph(graph<vertex> GA, bool isSym, bool useOutdeg,
 	if (!isSym) {
 
 		generateMapping(GA, reordering_algo, isSym, useOutdeg, new_ids, isPageRank, isDenseWrite, order_file, num_vertices,
-		                num_edges);
+		                num_edges, graph_name, sqlite_db_path);
 
 		/* Step VI - generate degree list for new graph */
 		pvector<uintT> degrees(numVertices);
@@ -1055,12 +1060,25 @@ graph<vertex> preprocessGraph(graph<vertex> GA, bool isSym, bool useOutdeg,
 		t.Stop();
 		string s = ReorderingAlgoStr(reordering_algo) + " Total Map Time";
 		t.PrintTime(s.c_str(), t.Seconds());
+
+		std::map<std::string, std::string> preproc_col_name_map = {
+				{"Random-1",   "random"},  // each random permutation is repeated, so add idx to algo str
+				{"Sort",       "sort"},
+				{"DBG",        "dbg"},
+				{"HubSort",    "hubsort"},
+				{"HubCluster", "hubcluster"}
+		};
+
+		single_val_set_int(sqlite_db_path, preproc_col_name_map[ReorderingAlgoStr(reordering_algo)], "preproc", graph_name,
+		                   t.Millisecs());
+
+
 		return graph<vertex>(newV, numVertices, numEdges, mem);
 	} else {
 		/* undirected graph */
 
 		generateMapping(GA, reordering_algo, isSym, true, new_ids, isPageRank, isDenseWrite, order_file, num_vertices,
-		                num_edges);
+		                num_edges, graph_name, sqlite_db_path);
 
 		/* Step VI - generate degree list for new graph */
 		pvector<uintT> degrees(numVertices);
@@ -1106,6 +1124,16 @@ graph<vertex> preprocessGraph(graph<vertex> GA, bool isSym, bool useOutdeg,
 		t.Stop();
 		string s = ReorderingAlgoStr(reordering_algo) + " Total Map Time";
 		t.PrintTime(s.c_str(), t.Seconds());
+		std::map<std::string, std::string> preproc_col_name_map = {
+				{"Random-1",   "random"},  // each random permutation is repeated, so add idx to algo str
+				{"Sort",       "sort"},
+				{"DBG",        "dbg"},
+				{"HubSort",    "hubsort"},
+				{"HubCluster", "hubcluster"}
+		};
+
+		single_val_set_int(sqlite_db_path, preproc_col_name_map[ReorderingAlgoStr(reordering_algo)], "preproc", graph_name,
+		                   t.Millisecs());
 		return graph<vertex>(newV, numVertices, numEdges, mem);
 	}
 }

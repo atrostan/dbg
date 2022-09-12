@@ -46,7 +46,7 @@ ALL= BC BellmanFord PageRank PageRankDelta Radii BC-iters BellmanFord-iters
 all: $(ALL)
 
 % : %.C $(COMMON_FILES)
-	$(PCC) $(PCFLAGS) -o $@ $<
+	$(PCC) $(PCFLAGS) -I ../../graph_preprocess/ -o $@ $< ../../graph_preprocess/sql.h ../../graph_preprocess/sql.cpp -lsqlite3
 
 $(COMMON_FILES):
 	ln -s ../ligra/$@ .
@@ -120,6 +120,14 @@ endif
 
 ifdef ORDER_FILE
 COMMON+=-order_file ${ORDER_FILE}
+endif
+
+ifdef GRAPH_NAME
+COMMON+=-graph_name ${GRAPH_NAME}
+endif
+
+ifdef SQLITE_DB_PATH
+COMMON+=-sqlite_db_path ${SQLITE_DB_PATH}
 endif
 
 ifeq ($(THREADS), 1)
