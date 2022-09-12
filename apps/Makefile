@@ -110,6 +110,18 @@ ifdef MAP_FILE
 COMMON+=-map_file ${MAP_FILE}
 endif
 
+ifdef NUM_VERTICES
+COMMON+=-num_vertices ${NUM_VERTICES}
+endif
+
+ifdef NUM_EDGES
+COMMON+=-num_edges ${NUM_EDGES}
+endif
+
+ifdef ORDER_FILE
+COMMON+=-order_file ${ORDER_FILE}
+endif
+
 ifeq ($(THREADS), 1)
 NUMA=numactl -N 0 -i 0
 TASKSET=taskset -c 0

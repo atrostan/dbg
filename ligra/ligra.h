@@ -49,6 +49,7 @@ using namespace std;
 int rand_gran = 1;
 int num_roots = 8;
 string map_file = "";
+string order_file = "";
 #endif
 
 //*****START FRAMEWORK*****
@@ -518,10 +519,14 @@ int parallel_main(int argc, char* argv[]) {
   if ( threads != omp_get_max_threads() ) {
       omp_set_num_threads(threads);
   }
-
+  uint32_t num_vertices;
+  uint64_t num_edges;
   rand_gran = P.getOptionIntValue("-rand_gran", 1);
   num_roots = P.getOptionIntValue("-num_roots", 8);
   map_file = P.getOptionValue("-map_file", "");
+  order_file = P.getOptionValue("-order_file", "");
+  num_vertices = P.getOptionIntValue("-num_vertices", -1);
+  num_edges = P.getOptionIntValue("-num_edges", -1);
 
   string degree_used_for_reordering_str = "none";
   enum ReorderingAlgo reordering_algo = (ReorderingAlgo) P.getOptionLongValue("-reordering_algo", DBG); 
@@ -540,7 +545,10 @@ int parallel_main(int argc, char* argv[]) {
   cout << "============ PARAMETERS ==========" << endl;
   cout << "threads: " << threads << " omp_get_max_threads: " << omp_get_max_threads() << endl;
   cout << "num_roots: " << num_roots << endl;
-  cout << "map_file: " << map_file << endl;
+	cout << "map_file: " << map_file << endl;
+	cout << "order_file: " << order_file << endl;
+	cout << "num_vertices: " << num_vertices << endl;
+	cout << "num_edges: " << num_edges << endl;
   cout << "rand_gran: " << rand_gran << endl;
   cout << "reordering_algo: " << reordering_algo << endl;
   cout << "reordering_algo_str: " << ReorderingAlgoStr(reordering_algo) << endl;
@@ -561,12 +569,12 @@ int parallel_main(int argc, char* argv[]) {
           if ( reordering_algo > MAP ) {
               pvector<uintE> new_ids1(G.n, UINT_E_MAX);
               pvector<uintE> new_ids2(G.n, UINT_E_MAX);
-              graph<symmetricVertex> newG1 = preprocessGraph<symmetricVertex>(G, symmetric, (degree_used_for_reordering == 0), new_ids1, false, false, MAP);
-              newG = preprocessGraph<symmetricVertex>(newG1, symmetric, (degree_used_for_reordering == 0), new_ids2, false, false, (ReorderingAlgo)(reordering_algo - MAP));
+              graph<symmetricVertex> newG1 = preprocessGraph<symmetricVertex>(G, symmetric, (degree_used_for_reordering == 0), new_ids1, false, false, MAP, order_file, num_vertices, num_edges);
+              newG = preprocessGraph<symmetricVertex>(newG1, symmetric, (degree_used_for_reordering == 0), new_ids2, false, false, (ReorderingAlgo)(reordering_algo - MAP), order_file, num_vertices, num_edges);
               mergeTwoPreprocessingIndices(new_ids1, new_ids2, new_ids);
               newG1.del();
           } else {
-              newG = preprocessGraph<symmetricVertex>(G, symmetric, (degree_used_for_reordering == 0), new_ids, false, false, reordering_algo);
+              newG = preprocessGraph<symmetricVertex>(G, symmetric, (degree_used_for_reordering == 0), new_ids, false, false, reordering_algo, order_file, num_vertices, num_edges);
           }
           G.del();
           Compute(newG,P,new_ids);
@@ -593,12 +601,12 @@ int parallel_main(int argc, char* argv[]) {
           if ( reordering_algo > MAP ) {
               pvector<uintE> new_ids1(G.n, UINT_E_MAX);
               pvector<uintE> new_ids2(G.n, UINT_E_MAX);
-              graph<asymmetricVertex> newG1 = preprocessGraph<asymmetricVertex>(G, symmetric, (degree_used_for_reordering == 0), new_ids1, isPageRank, isDenseWrite, MAP);
-              newG = preprocessGraph<asymmetricVertex>(newG1, symmetric, (degree_used_for_reordering == 0), new_ids2, isPageRank, isDenseWrite, (ReorderingAlgo)(reordering_algo - MAP));
+              graph<asymmetricVertex> newG1 = preprocessGraph<asymmetricVertex>(G, symmetric, (degree_used_for_reordering == 0), new_ids1, isPageRank, isDenseWrite, MAP, order_file, num_vertices, num_edges);
+              newG = preprocessGraph<asymmetricVertex>(newG1, symmetric, (degree_used_for_reordering == 0), new_ids2, isPageRank, isDenseWrite, (ReorderingAlgo)(reordering_algo - MAP), order_file, num_vertices, num_edges);
               mergeTwoPreprocessingIndices(new_ids1, new_ids2, new_ids);
               newG1.del();
           } else {
-              newG = preprocessGraph<asymmetricVertex>(G, symmetric, (degree_used_for_reordering == 0), new_ids, isPageRank, isDenseWrite, reordering_algo);
+              newG = preprocessGraph<asymmetricVertex>(G, symmetric, (degree_used_for_reordering == 0), new_ids, isPageRank, isDenseWrite, reordering_algo, order_file, num_vertices, num_edges);
           }
         G.del();
         Compute(newG,P,new_ids);
