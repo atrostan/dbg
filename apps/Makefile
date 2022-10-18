@@ -45,8 +45,11 @@ ALL= BC BellmanFord PageRank PageRankDelta Radii BC-iters BellmanFord-iters
 
 all: $(ALL)
 
+# hardcoded path for graph preprocess dir
+graph_preprocess_dir=/home/atrostan/workspace/repos/congenial-enigma/graph_preprocess
+
 % : %.C $(COMMON_FILES)
-	$(PCC) $(PCFLAGS) -I ../../graph_preprocess/ -o $@ $< ../../graph_preprocess/sql.h ../../graph_preprocess/sql.cpp -lsqlite3
+	$(PCC) $(PCFLAGS) -I ${graph_preprocess_dir} -o $@ $< ${graph_preprocess_dir}/sql.h ${graph_preprocess_dir}/sql.cpp -lsqlite3
 
 $(COMMON_FILES):
 	ln -s ../ligra/$@ .
