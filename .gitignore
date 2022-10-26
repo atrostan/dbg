@@ -1,3 +1,11 @@
 datasets/
 logs/
 graph-convert-utils/convert
+
+apps/BC-iters
+apps/BC
+apps/BellmanFord-iters
+apps/BellmanFord
+apps/PageRank
+apps/PageRankDelta
+apps/Radii
