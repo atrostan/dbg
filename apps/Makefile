@@ -45,8 +45,8 @@ ALL= BC BellmanFord PageRank PageRankDelta Radii BC-iters BellmanFord-iters
 
 all: $(ALL)
 
-# hardcoded path for graph preprocess dir
-graph_preprocess_dir=/home/atrostan/workspace/repos/congenial-enigma/graph_preprocess
+cd .# relative path for graph preprocess dir
+graph_preprocess_dir=../../graph_preprocess
 
 % : %.C $(COMMON_FILES)
 	$(PCC) $(PCFLAGS) -I ${graph_preprocess_dir} -o $@ $< ${graph_preprocess_dir}/sql.h ${graph_preprocess_dir}/sql.cpp -lsqlite3
@@ -151,7 +151,7 @@ CINTGR=.cintgr
 CSVGR=.csvgr
 
 run-PageRank: # PULL (OUT-DEGREE)
-	${NUMA} ${TASKSET} ${DBG_ROOT}/apps/PageRank -reordering_algo ${REORDERING_ALGO} -maxiters ${MAXITERS} -is_pagerank 1 ${COMMON} ${GPATH}/${DATASET}${CVGR}
+	${NUMA} ${TASKSET} ${DBG_ROOT}/apps/PageRank -reordering_algo ${REORDERING_ALGO} -maxiters ${MAXITERS} -is_pagerank 1 ${COMMON} ${GPATH}/${COMPRESSED_EDGE_LIST_FNAME}${CVGR}
 
 run-PageRankDelta: # PUSH (IN-DEGREE)
 	${NUMA} ${TASKSET} ${DBG_ROOT}/apps/PageRankDelta -reordering_algo ${REORDERING_ALGO} -maxiters ${MAXITERS} -is_dense_write 1 ${COMMON} ${GPATH}/${DATASET}${CVGR}
