@@ -45,7 +45,7 @@ ALL= BC BellmanFord PageRank PageRankDelta Radii BC-iters BellmanFord-iters
 
 all: $(ALL)
 
-cd .# relative path for graph preprocess dir
+# relative path for graph preprocess dir
 graph_preprocess_dir=../../graph_preprocess
 
 % : %.C $(COMMON_FILES)

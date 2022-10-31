@@ -9,3 +9,5 @@ apps/BellmanFord
 apps/PageRank
 apps/PageRankDelta
 apps/Radii
+
+apps/core.*
