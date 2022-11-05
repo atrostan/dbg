@@ -34,7 +34,7 @@
 #include <parallel/algorithm>
 #include <omp.h>
 #include <cassert>
-#include "../../graph_preprocess/sql.h"
+#include "sql.h"
 #include <map>
 #include "parallel.h"
 #include "blockRadixSort.h"
