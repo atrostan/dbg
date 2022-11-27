@@ -157,7 +157,7 @@ run-PageRankDelta: # PUSH (IN-DEGREE)
 	${NUMA} ${TASKSET} ${DBG_ROOT}/apps/PageRankDelta -reordering_algo ${REORDERING_ALGO} -maxiters ${MAXITERS} -is_dense_write 1 ${COMMON} ${GPATH}/${DATASET}${CVGR}
 
 run-Radii: # PULL-PUSH (OUT-DEGREE)
-	${NUMA} ${TASKSET} ${DBG_ROOT}/apps/Radii -reordering_algo ${REORDERING_ALGO} ${COMMON} ${GPATH}/${DATASET}${CVGR}
+	${NUMA} ${TASKSET} ${DBG_ROOT}/apps/Radii -reordering_algo ${REORDERING_ALGO} ${COMMON} ${GPATH}/${COMPRESSED_EDGE_LIST_FNAME}${CVGR}
 
 run-BellmanFord: #PUSH (IN_DEGREE) WEIGHTED
 	${NUMA} ${TASKSET} ${DBG_ROOT}/apps/BellmanFord -reordering_algo ${REORDERING_ALGO} -is_dense_write 1 -r ${ROOT} ${COMMON} ${GPATH}/${DATASET}${CINTGR}

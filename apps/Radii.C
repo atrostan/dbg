@@ -69,7 +69,7 @@ struct Radii_Vertex_F {
   }
 };
 
-#ifdef _OUTPUT_
+// #ifdef _OUTPUT_
 void sampleOutput(intE* arr, bool preprocessed, const pvector<uintE> &new_ids) {
     std::cout << "Radii output! data preprocessed? " << preprocessed << std::endl;
     for ( long i = 0 ; i < 10 && i < new_ids.size() ; i++ ) {
@@ -79,7 +79,7 @@ void sampleOutput(intE* arr, bool preprocessed, const pvector<uintE> &new_ids) {
             std::cout << i << " " << arr[i] << std::endl;
     }
 }
-#endif
+// #endif
 
 template <class vertex>
 void Compute(graph<vertex>& GA, commandLine P, pvector<uintE> &new_ids) {
@@ -123,13 +123,15 @@ void Compute(graph<vertex>& GA, commandLine P, pvector<uintE> &new_ids) {
     Frontier = output;
   }
   free(Visited); free(NextVisited); Frontier.del();
-#ifdef _OUTPUT_
+// #ifdef _OUTPUT_
+
+
   tm.Stop();
   sampleOutput(radii, preprocessed, new_ids);
   free(radii);
-#else
-  free(radii);
-  tm.Stop();
-#endif
+// #else
+  // free(radii);
+  // tm.Stop();
+// #endif
   tm.PrintTime("Radii Run Time(sec) ", tm.Seconds()); 
 }
