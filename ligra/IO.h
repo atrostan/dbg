@@ -844,7 +844,7 @@ generateHubClusterMapping(const graph<vertex> &GA, bool isSym, bool useOutdeg, p
 
 	t.Stop();
 	t.PrintTime("HubCluster Map Time", t.Seconds());
-	single_val_set_int(sqlite_db_path, "hubcluster", "preproc", graph_name, t.Millisecs());
+	single_val_set<uint32_t>(sqlite_db_path, "hubcluster", "preproc", graph_name, t.Millisecs());
 }
 
 
@@ -930,7 +930,7 @@ generateHubSortMapping(const graph<vertex> &GA, bool isSym, bool useOutdeg, pvec
 
 	t.Stop();
 	t.PrintTime("HubSort Map Time", t.Seconds());
-	single_val_set_int(sqlite_db_path, "hubsort", "preproc", graph_name, t.Millisecs());
+	single_val_set<uint32_t>(sqlite_db_path, "hubsort", "preproc", graph_name, t.Millisecs());
 
 }
 
@@ -1069,7 +1069,7 @@ graph<vertex> preprocessGraph(graph<vertex> GA, bool isSym, bool useOutdeg,
 				{"HubCluster", "hubcluster"}
 		};
 
-		single_val_set_int(sqlite_db_path, preproc_col_name_map[ReorderingAlgoStr(reordering_algo)], "preproc", graph_name,
+		single_val_set<uint32_t>(sqlite_db_path, preproc_col_name_map[ReorderingAlgoStr(reordering_algo)], "preproc", graph_name,
 		                   t.Millisecs());
 
 
@@ -1132,7 +1132,7 @@ graph<vertex> preprocessGraph(graph<vertex> GA, bool isSym, bool useOutdeg,
 				{"HubCluster", "hubcluster"}
 		};
 
-		single_val_set_int(sqlite_db_path, preproc_col_name_map[ReorderingAlgoStr(reordering_algo)], "preproc", graph_name,
+		single_val_set<uint32_t>(sqlite_db_path, preproc_col_name_map[ReorderingAlgoStr(reordering_algo)], "preproc", graph_name,
 		                   t.Millisecs());
 		return graph<vertex>(newV, numVertices, numEdges, mem);
 	}
